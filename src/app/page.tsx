@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { question } from "../data.json";
+import data from "../data.json";
 import { Assessment, promptAssessment } from "@/services";
 
 export default function Home() {
@@ -17,44 +17,46 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4">
-      {!assessment ? (
-        !loading ? (
-          <>
-            <p>{question}</p>
-            <div className="flex gap-1">
-              <input
-                type="text"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                className="border border-gray-400 rounded-md p-2 w-96"
-              />
-              <button
-                onClick={handleClick}
-                className="rounded-md p-2 text-white bg-cyan-700"
-              >
-                Send
-              </button>
-            </div>
-          </>
-        ) : (
-          <p>loading...</p>
-        )
-      ) : (
+      {!assessment && !loading && (
+        <>
+          <p>{data.question}</p>
+          <div className="flex gap-1">
+            <input
+              type="text"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              className="border border-gray-400 rounded-md p-2 w-96"
+            />
+            <button
+              onClick={handleClick}
+              className="rounded-md p-2 text-white bg-cyan-700"
+            >
+              Send
+            </button>
+          </div>
+        </>
+      )}
+      {loading && <p>loading...</p>}
+      {assessment && (
         <table>
-          <tr>
-            <th>Læringsmål</th>
-            <th>Vurdering</th>
-            <th>Score</th>
-            <th>Anbefaling</th>
-          </tr>
-          {assessment.map((item) => (
+          <thead>
             <tr>
-              <td>{item.assessmentCriteria}</td>
-              <td>{item.assessment.written_assessment}</td>
-              <td>{item.assessment.score}</td>
-              <td>{item.assessment.directions_for_improvement}</td>
+              <th>Læringsmål</th>
+              <th>Vurdering</th>
+              <th>Score</th>
+              <th>Anbefaling</th>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {assessment.map((item, index) => (
+              <tr key={index}>
+                <td>{item.assessmentCriteria}</td>
+                <td>{item.assessment.written_assessment}</td>
+                <td>{item.assessment.score}</td>
+                <td>{item.assessment.directions_for_improvement}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
     </main>

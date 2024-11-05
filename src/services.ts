@@ -1,11 +1,13 @@
+"use server";
 require("dotenv").config();
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import { topic, question, solution } from "./data.json";
 
-const configuration = new Configuration({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  organization: process.env.ORGANIZATION_ID,
+  project: process.env.PROJECT_ID,
 });
-const openai = new OpenAIApi(configuration);
 
 export type Assessment = {
   assessmentCriteria: string;
@@ -75,12 +77,12 @@ const systemMessage = `
   Svar direkte til studenten.
   
   Din vurdering av studentens besvarelse skal inneholde en vurdering av følgende liste med vurderingskriterier. Studenten:
-  - Eleven forstår betydningen av fagforeningens rolle i arbeidslivet, og kan forklare hvordan har påvirket arbeidernes forhold og rettigheter.`;
+  - Eleven forstår betydningen av fagforeningens rolle i arbeidslivet, og kan forklare hvordan det har påvirket arbeidernes forhold og rettigheter.`;
 
-export const promptAssessment = (studentAnswer: string): Assessment[] => {
+export const promptAssessment = async (studentAnswer: string) => {
   const prompt = `Returner en faglig vurdering for følgende besvarelse: ${studentAnswer}`;
-  const assessment = openai
-    .createChatCompletion({
+  const assessment = openai.chat.completions
+    .create({
       model: "gpt-4",
       messages: [
         { role: "system", content: systemMessage },
@@ -93,7 +95,7 @@ export const promptAssessment = (studentAnswer: string): Assessment[] => {
       // Note the updated location for the response
       const json = JSON.parse(
         // @ts-ignore
-        completion.data.choices[0].message.function_call.arguments
+        completion.choices[0].message.function_call.arguments
       );
       return json.assessment;
     })
